@@ -2,11 +2,11 @@ package jm.task.core.jdbc.model;
 
 import javax.persistence.*;
 
-@Entity                                     //+
-@Table (name = "bank_client.users_too")     // + c name
+@Entity
+@Table(name = "bank_client.users_too")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)   // +
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
@@ -20,6 +20,9 @@ public class User {
     private Byte age;
 
     public User() {
+    }
+
+    public User(long id) {
 
     }
 
@@ -60,5 +63,14 @@ public class User {
 
     public void setAge(Byte age) {
         this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
+                '}';
     }
 }

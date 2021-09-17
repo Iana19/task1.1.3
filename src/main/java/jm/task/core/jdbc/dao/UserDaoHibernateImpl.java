@@ -7,10 +7,12 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
-    HibernateSessionFactoryUtil hibernateSessionFactoryUtil = new HibernateSessionFactoryUtil();
+    private HibernateSessionFactoryUtil hibernateSessionFactoryUtil = new HibernateSessionFactoryUtil();
+
     public UserDaoHibernateImpl() {
 
     }
@@ -24,7 +26,7 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void dropUsersTable() {
         Session session = hibernateSessionFactoryUtil.getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();   //tx1
+        Transaction transaction = session.beginTransaction();
         String sql = "DROP TABLE IF EXISTS bank_client.users_too";
         Query query = session.createSQLQuery(sql);              //addEntity(User.class);
         transaction.commit();
@@ -43,15 +45,19 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        User user = new User();         // ТУТ
+        User user = new User(id);
         Session session = hibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         session.delete(user);
+        transaction.commit();
+        session.close();
     }
 
     @Override
     public List<User> getAllUsers() {
-        return null;
+        List<User> users = (List<User>) HibernateSessionFactoryUtil.getSessionFactory().openSession()
+                .createQuery("From User").list();
+        return users;
     }
 
     @Override

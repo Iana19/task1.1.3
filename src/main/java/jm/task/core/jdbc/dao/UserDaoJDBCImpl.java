@@ -16,46 +16,73 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        String sql = "CREATE TABLE bank_client.users_too " +
+
+        Connection connection = util.getConnection();
+        String sql = "CREATE TABLE if not exists bank_client.users_too " +
                 "(id INTEGER  not NULL auto_increment, " +
                 " name VARCHAR(255), " +
                 " last_name VARCHAR(255), " +
                 " age INTEGER, " +
                 " PRIMARY KEY ( id ))";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.execute();
+            System.out.println("Table's created");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        execute(sql);
-        System.out.println("Table's created");
     }
 
     public void dropUsersTable() {
+        Connection connection = util.getConnection();
         String sql = "DROP TABLE IF EXISTS bank_client.users_too";
-        execute(sql);
-        System.out.println("Table's dropped");
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.execute();
+            System.out.println("Table's dropped");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        String columns = "(name, last_name, age)";
-        String sql = "INSERT INTO bank_client.users_too " + columns +
-                " VALUES ('" + name + "', '" + lastName + "', " + age + ") ";
-        execute(sql);
-        System.out.println("Save is INSERT");
+
+        Connection connection = util.getConnection();
+        String sql = "INSERT INTO bank_client.users_too (name, last_name, age)" +
+                " VALUES (?, ?, ?) ";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setByte(3, age);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void removeUserById(long id) {
-        String sql = "DELETE FROM bank_client.users_too WHERE ID = id";
-        execute(sql);
-        System.out.println("remove выполнен");
+        Connection connection = util.getConnection();
+        String sql = "DELETE FROM bank_client.users_too WHERE ID = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+            System.out.println("remove выполнен id: " + id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public List<User> getAllUsers() {
-        List<User> users = new ArrayList<>();
-        Connection connection;
-        Statement statement;
-        connection = util.getConnection();
-        String sql = "SELECT * FROM bank_client.users_too";
+        List <User> users = new ArrayList<>();
+        Connection connection = util.getConnection();
         try {
-            statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(sql);
+            String sql = "SELECT * FROM bank_client.users_too";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery(sql);
             while ((rs.next())) {
                 String name = rs.getString(2);
                 String lastName = rs.getString(3);
@@ -64,35 +91,12 @@ public class UserDaoJDBCImpl implements UserDao {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
+
         return users;
     }
 
     public void cleanUsersTable() {
         dropUsersTable();
-    }
-
-    private void execute(String sql) {
-        Connection connection;
-        Statement statement;
-        connection = util.getConnection();
-        try {
-            statement = connection.createStatement();
-            statement.executeUpdate(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }
