@@ -10,6 +10,7 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
     private Util util = new Util();
+    Connection connection = util.getConnection();
 
     public UserDaoJDBCImpl() {
 
@@ -17,7 +18,6 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void createUsersTable() {
 
-        Connection connection = util.getConnection();
         String sql = "CREATE TABLE if not exists bank_client.users_too " +
                 "(id INTEGER  not NULL auto_increment, " +
                 " name VARCHAR(255), " +
@@ -35,7 +35,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        Connection connection = util.getConnection();
+
         String sql = "DROP TABLE IF EXISTS bank_client.users_too";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -48,7 +48,6 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
 
-        Connection connection = util.getConnection();
         String sql = "INSERT INTO bank_client.users_too (name, last_name, age)" +
                 " VALUES (?, ?, ?) ";
         try {
@@ -64,7 +63,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        Connection connection = util.getConnection();
+
         String sql = "DELETE FROM bank_client.users_too WHERE ID = ?";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -77,8 +76,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public List<User> getAllUsers() {
-        List <User> users = new ArrayList<>();
-        Connection connection = util.getConnection();
+        List<User> users = new ArrayList<>();
         try {
             String sql = "SELECT * FROM bank_client.users_too";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -97,6 +95,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
+
         dropUsersTable();
     }
+
 }
