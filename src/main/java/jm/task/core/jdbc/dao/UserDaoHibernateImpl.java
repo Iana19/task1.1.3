@@ -20,6 +20,12 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
+        Session session = hibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        String sql = "CREATE TABLE if not exists bank_client.users_too";
+        session.createSQLQuery(sql);
+        transaction.commit();
+        session.close();
 
     }
 
@@ -28,7 +34,7 @@ public class UserDaoHibernateImpl implements UserDao {
         Session session = hibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         String sql = "DROP TABLE IF EXISTS bank_client.users_too";
-        Query query = session.createSQLQuery(sql);              //addEntity(User.class);
+        session.createSQLQuery(sql);
         transaction.commit();
         session.close();
     }
@@ -62,6 +68,6 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-
+        dropUsersTable();
     }
 }
