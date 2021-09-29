@@ -2,6 +2,7 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.HibernateSessionFactoryUtil;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -27,6 +28,11 @@ public class UserDaoHibernateImpl implements UserDao {
         transaction.commit();
         session.close();
 
+        List<User> users = getAllUsers();
+        for (User us : users) {
+            System.out.println(us);
+        }
+        System.out.println("Create table size: " + getAllUsers().size());
     }
 
     @Override
@@ -51,23 +57,37 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        User user = new User(id);
         Session session = hibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
-        session.delete(user);
+        Query q = session.createQuery("delete User where id = " + id);
+        q.executeUpdate();
         transaction.commit();
         session.close();
+        System.out.println("Пользователь c id " + id + " удален");
     }
 
     @Override
     public List<User> getAllUsers() {
-        List<User> users = (List<User>) HibernateSessionFactoryUtil.getSessionFactory().openSession()
-                .createQuery("From User").list();
+
+        List<User> users = new ArrayList<>();
+        Session session = hibernateSessionFactoryUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+            users = session.createCriteria(User.class).list();
+        } catch (HibernateException e) {
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
         return users;
     }
 
     @Override
     public void cleanUsersTable() {
-        dropUsersTable();
+        Session session = hibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        session.createQuery("DELETE FROM User").executeUpdate();
+        transaction.commit();
+        session.close();
     }
 }
